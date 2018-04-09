@@ -1,0 +1,114 @@
+UPDATE PISO SET PRECIO = (PRECIO + 5) WHERE LOC = "L-Estartit";
+
+UPDATE PISO SET COMISION = (COMISION + 5) WHERE COMISION != 100;
+
+DELETE FROM CAJA WHERE DIA = '2006-04-16';
+
+Consulta 4: Eliminar los pedidos con día de llegada 17/4/2006.
+DELETE FROM PEDIDO WHERE LLEGADA = '2006-04-17';
+
+Consulta 5: Importe máximo y mínimo que ha pasado por caja entre los días 14/11/2005 y 01/02/2006 (ambos inclusive)
+Salida: maximo, minimo
+SELECT MAX(IMPORTE) AS MAXIMO, MIN(IMPORTE) AS MINIMO FROM CAJA WHERE PAGADO = 1 AND IMPORTE > 0 AND DIA between CAST('2005-11-14' AS DATE) and CAST('2006-02-01' AS DATE);
+
+Consulta 6: ¿Cuántos alquileres comienzan el día 01/02/2006?
+Salida: número
+SELECT COUNT(N_PEDIDO) FROM PEDIDO WHERE LLEGADA = '2006-02-01';
+
+
+Consulta 7: ¿Cuántos pisos hay en L'Estartit?
+Salida: número
+SELECT COUNT(N_PISO) FROM PISO WHERE LOC = 'L-Estartit';
+
+
+Consulta 8: ¿Cuántos pedidos se han cancelado con el piso número 10?
+Salida: número
+SELECT COUNT(N_PEDIDO) FROM PEDIDO WHERE N_PISO = 10 AND CANCELADO = 1;
+
+Consulta 9: ¿Qué clientes se van el mes de octubre de 2005?
+Salida: nif_cli
+SELECT NIF_CLI FROM PEDIDO WHERE PARTIDA  BETWEEN CAST('2005-10-01' AS DATE) AND CAST('2005-10-31' AS DATE);
+
+Consulta 10: ¿Qué propietarios hay con algún apellido que cotenga la letra 'u'?
+Salida: nif_prop, apel
+SELECT NIF_PROP, APEL FROM PROP WHERE APEL LIKE '%u%';
+
+Consulta 11: ¿Qué pisos hay en Pals o en L'Escala con un precio inferior o igual a 50,00€ por día?
+Salida: n_piso, precio
+SELECT N_PISO, PRECIO FROM PISO WHERE LOC IN('Pals', 'L-Escala') and PRECIO <= '50.00';
+
+
+Consulta 12: ¿Cuántos propietarios tenemos de cada localidad?
+Salida: localidad, numero
+SELECT COUNT(NIF_PROP), LOC FROM PROP GROUP BY LOC;
+
+Consulta 13: Para cada día de caja mostrar la cantidad diaria de pagos de tipo A que se ha hecho.
+Salida: dia, numero
+SELECT COUNT(OPERACION), DIA FROM CAJA WHERE OPERACION='A' GROUP BY DIA;
+
+Consulta 14: ¿Qué beneficio tiene actualmente la agencia por cada pedido?
+Salida: n_pedido, numero
+SELECT PEDIDO.N_PEDIDO,((CAJA.IMPORTE*PISO.COMISION)/100) AS NUMERO FROM (PEDIDO INNER JOIN CAJA ON PEDIDO.N_PEDIDO = CAJA.N_PEDIDO) INNER JOIN PISO WHERE PEDIDO.N_PISO = PISO.N_PISO GROUP BY N_PEDIDO;
+
+Consulta 15: ¿Cuántos pisos, iguales o diferentes, ha contratado cada cliente?
+Salida: nif_cli, numero
+SELECT NIF_CLI, COUNT(N_PEDIDO) AS NUMERO FROM PEDIDO GROUP BY NIF_CLI;
+
+
+Consulta 16: Listado de nombres y apellidos de propietarios con la dirección y la localidad de sus pisos.
+Salida: nombre, apellidos, dirección, localidad
+SELECT PROP.NOMBRE, PROP.APEL, PISO.DIR, PISO.LOC FROM (PROP INNER JOIN PISO ON PROP.NIF_PROP = PISO.NIF_PROP);
+
+Consulta 17: Listado de pagos que se han hecho en contratos con el piso número 5.
+Salida: n_factura, operacion, importe, dia
+SELECT PROP.NOMBRE, PROP.APEL, PISO.DIR, PISO.LOC FROM (PROP INNER JOIN PISO ON PROP.NIF_PROP = PISO.NIF_PROP);
+
+
+Consulta 18: ¿Qué pedidos se ha hecho con el piso de dirección 'Av. Girona 10' de L'Escala?
+Salida: n_pedido
+ SELECT PEDIDO.N_PEDIDO FROM PEDIDO INNER JOIN PISO ON PEDIDO.N_PISO = PISO.N_PISO AND PISO.DIR = "Av. Girona 10";
+
+Consulta 19: Por cada propitario dar la suma del precio/dia de sus pisos.
+Salida: nombre, apel, numero
+SELECT PROP.NOMBRE, PROP.APEL,SUM(PISO.PRECIO) AS NUMERO FROM PROP INNER JOIN PISO ON PROP.NIF_PROP= PISO.NIF_PROP GROUP BY PROP.NOMBRE;
+
+Consulta 20: Dar el número de pisos que ha alquilado cada cliente (no mostrar los que no han alquilado nada).
+Salida: nombre, apel, numero
+SELECT CLI.NOMBRE, CLI.APEL, COUNT(PEDIDO.N_PEDIDO) AS NUMERO FROM CLI INNER JOIN PEDIDO ON CLI.NIF_CLI=PEDIDO.NIF_CLI GROUP BY NOMBRE;
+
+
+Consulta 21: Para cada pedido (que se le pueda aplicar) dar las fechas de las parejas formadas por los pagos 'A' y pagos 'B'.
+Salida: n_pedido, fecha1, fecha2
+select distinct c1.N_PEDIDO, c1.DIA FECHA_A , c2.DIA FECHA_B from CAJA c1 right join CAJA c2 ON c1.N_PEDIDO = c2.N_PEDIDO WHERE c1.OPERACION IN ('A','B') and c2.OPERACION in ('A', 'B');
+
+SELECT c1.N_PEDIDO,c1.DIA as "fecha1", c2.DIA as "fecha2" FROM CAJA c1, CAJA c2 WHERE c1.N_PEDIDO=c2.N_PEDIDO AND c1.OPERACION="A" AND c2.operacion="B" GROUP BY c1.N_PEDIDO;
+
+
+Consulta 22: Dar las direcciones de todas las parejas posibles de pisos de manera que el primero sea de L'Estartit, el segundo de L'Escala y su precio conjunto sea de 95,00€.
+Salida: n_piso1, direccion1, n_piso2, direccion2
+SELECT p1.N_PISO, p1.DIR, p2.N_PISO, p2.DIR from PISO p1, PISO p2 WHERE p1.LOC = 'L-Estartit' AND p2.LOC = 'L-Escala' AND (p1.PRECIO + p2.PRECIO= 95.00);
+
+Consulta 23: Dar el nif de los clientes que han alquilado pisos en L'Escala.
+Salida: nif_cli
+SELECT PEDIDO.NIF_CLI FROM PEDIDO INNER JOIN PISO ON PEDIDO.N_PISO = PISO.N_PISO AND PISO.LOC='L-Escala';
+
+
+Consulta 24: Dar nombre y apellidos de los clientes que han alquilado pisos en L'Escala.
+Salida: nombre, apel
+SELECT CLI.NOMBRE, CLI.APEL FROM((CLI INNER JOIN PEDIDO ON CLI.NIF_CLI = PEDIDO.NIF_CLI) INNER JOIN PISO ON PEDIDO.N_PISO = PISO.N_PISO AND PISO.LOC='L-Escala');
+
+
+Consulta 25: Dar la dirección de todos los pisos de la propietaria Antonia Sierra Martin.
+Salida: dir, loc
+ SELECT PISO.DIR, PISO.LOC FROM PISO INNER JOIN PROP ON PISO.NIF_PROP=PROP.NIF_PROP AND PROP.NOMBRE = 'Antonia' AND PROP.APEL='Sierra Martin';
+
+
+Consulta 26: Dar para cada localidad la dirección del piso más barato.
+Salida: dir, loc, precio
+SELECT DIR, LOC, MIN(PRECIO) FROM PISO GROUP BY LOC;
+
+
+Consulta 27: Dar la dirección de los pisos que tienen un precio por encima de la media de precios de todos los pisos.
+Salida: dir, loc, precio
+SELECT DIR, LOC, PRECIO FROM PISO WHERE PRECIO >(SELECT AVG(PRECIO) FROM PISO);
+
