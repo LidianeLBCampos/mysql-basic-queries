@@ -1,7 +1,12 @@
+Consulta1: Subir en 5€ el precio de todos los pisos de L-Estartit.
 UPDATE PISO SET PRECIO = (PRECIO + 5) WHERE LOC = "L-Estartit";
+Consulta 2: Subir un 5% la comisión de todos los pisos.
 
+Nota 1: Una comisión superior al 100% no será válida.
+Nota 2: No se trata de subir en un 5% el porcentaje actual de cada comisión (por ejemplo, que una comisión del 5% pase a ser del 5,25%), sino de subir un 5% en general (por ejemplo, que una comisión del 1% pase a ser del 6%, o que una del 5% pase a ser del 10%)
 UPDATE PISO SET COMISION = (COMISION + 5) WHERE COMISION != 100;
 
+Consulta 3: Eliminar las entradas de caja correspondientes al día 16/04/2006.
 DELETE FROM CAJA WHERE DIA = '2006-04-16';
 
 Consulta 4: Eliminar los pedidos con día de llegada 17/4/2006.
@@ -61,7 +66,7 @@ SELECT PROP.NOMBRE, PROP.APEL, PISO.DIR, PISO.LOC FROM (PROP INNER JOIN PISO ON 
 
 Consulta 17: Listado de pagos que se han hecho en contratos con el piso número 5.
 Salida: n_factura, operacion, importe, dia
-SELECT PROP.NOMBRE, PROP.APEL, PISO.DIR, PISO.LOC FROM (PROP INNER JOIN PISO ON PROP.NIF_PROP = PISO.NIF_PROP);
+SELECT N_FACTURA, OPERACION, IMPORTE, DIA FROM CAJA INNER JOIN PEDIDO ON CAJA.N_PEDIDO = PEDIDO.N_PEDIDO AND N_PISO = 5;
 
 
 Consulta 18: ¿Qué pedidos se ha hecho con el piso de dirección 'Av. Girona 10' de L'Escala?
